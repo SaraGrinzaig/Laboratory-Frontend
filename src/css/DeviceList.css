@@ -1,0 +1,93 @@
+/* כללי עיצוב ראשיים לקומפוננטת רשימת מכשירים */
+.devices-list {
+    direction: rtl; /* תמיכה בטקסט מימין לשמאל */
+    margin: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-family: 'Arial', sans-serif;
+}
+
+.devices-list h1 {
+    text-align: center;
+    color: #333;
+}
+
+.device-item {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.device-item h2 {
+    color: #2a2a2a;
+    margin: 0 0 10px;
+}
+
+.device-item p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+}
+
+.device-item input[type="number"],
+.device-item select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.device-item input[type="number"]:focus,
+.device-item select:focus {
+    border-color: #0056b3;
+    outline: none;
+}
+
+.status-select {
+    display: block;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    direction: rtl;  /* תמיכה בטקסט מימין לשמאל */
+}
+
+th, td {
+    padding: 8px;
+    text-align: right;  /* יישור הטקסט לימין */
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+button {
+    padding: 6px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: #ccc;
+}
+
+button:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+Modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+}
