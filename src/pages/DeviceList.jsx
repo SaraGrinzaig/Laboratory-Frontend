@@ -142,3 +142,84 @@ const DeviceList = () => {
 };
 
 export default DeviceList;
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import DeviceFormModal from './DeviceFormModal'; // Import the DeviceFormModal component
+// import Modal from 'react-modal';
+// import '../css/DeviceList.css';
+
+// Modal.setAppElement('#root');  // Set the root element for the modal
+
+// const DeviceList = () => {
+//     const [devices, setDevices] = useState([]);
+//     const [loading, setLoading] = useState(true);
+//     const [error, setError] = useState('');
+//     const [modalIsOpen, setModalIsOpen] = useState(false); // Modal state for DeviceFormModal
+
+//     useEffect(() => {
+//         fetchDevices();
+//     }, []);
+
+//     const fetchDevices = async () => {
+//         try {
+//             const response = await fetch('https://localhost:5000/api/Device');
+//             const data = await response.json();
+//             setDevices(data);
+//             setLoading(false);
+//         } catch (err) {
+//             setError('נכשל בטעינת המכשירים: ' + err.message);
+//             setLoading(false);
+//         }
+//     };
+
+//     const openModal = () => {
+//         setModalIsOpen(true);
+//     };
+
+//     const closeModal = () => {
+//         setModalIsOpen(false);
+//     };
+
+//     if (loading) return <div>טוען...</div>;
+//     if (error) return <div>שגיאה: {error}</div>;
+
+//     return (
+//         <div>
+//             <h1>רשימת מכשירים</h1>
+
+//             {/* Button to open the modal for adding a new device */}
+//             <button onClick={openModal}>הוסף מכשיר חדש</button>
+
+//             {/* Device Form Modal */}
+//             <DeviceFormModal modalIsOpen={modalIsOpen} closeModal={closeModal} />
+
+//             <table>
+//                 <thead>
+//                     <tr>
+//                         <th>סוג</th>
+//                         <th>דגם</th>
+//                         <th>תקלה</th>
+//                         <th>מחיר משוער</th>
+//                         <th>סטטוס</th>
+//                         <th>פעולות</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+//                     {devices.map(device => (
+//                         <tr key={device.id}>
+//                             <td>{device.deviceType}</td>
+//                             <td>{device.deviceModel}</td>
+//                             <td>{device.issueDescription}</td>
+//                             <td>₪{device.estimatedPrice.toFixed(2)}</td>
+//                             <td>{device.status}</td>
+//                         </tr>
+//                     ))}
+//                 </tbody>
+//             </table>
+//         </div>
+//     );
+// };
+
+// export default DeviceList;
