@@ -55,6 +55,11 @@ const DeviceList = () => {
     };
 
     const handleFinalPriceSubmit = async () => {
+        if (!selectedDevice.finalPriceInput) {
+            alert('נא להזין מחיר סופי');
+            return;
+        }
+    
         const updatedDevice = { ...selectedDevice, finalPrice: selectedDevice.finalPriceInput };
         try {
             const response = await fetch(`https://localhost:5000/api/Device/${selectedDevice.id}`, {
@@ -62,14 +67,13 @@ const DeviceList = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedDevice),
             });
-
+    
             if (response.ok) {
                 fetchDevices(); // עדכון רשימת המכשירים לאחר השינוי
+                setModalIsOpen(false);
             } else {
                 console.error('Failed to update final price.');
             }
-
-            setModalIsOpen(false);
         } catch (err) {
             console.error('Error updating final price:', err);
         }
@@ -80,26 +84,31 @@ const DeviceList = () => {
     };
 
     const handleStatusChange = async (deviceId, newStatusId) => {
-        const newStatus = {
-            deviceId,
-            statusId: newStatusId,
-            statusChangeDate: new Date().toISOString(),
-        };
-
-        try {
-            const response = await fetch(`https://localhost:5000/api/Status`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newStatus),
-            });
-
-            if (response.ok) {
-                fetchDevices(); // רענון רשימת המכשירים לאחר עדכון הסטטוס
-            } else {
-                console.error('Failed to update status.');
+        if (newStatusId === '5') { // מספר הזיהוי של סטטוס 'הסתיים'
+            setSelectedDevice(devices.find(device => device.id === deviceId));
+            setModalIsOpen(true);
+        } else {
+            const newStatus = {
+                deviceId,
+                statusId: newStatusId,
+                statusChangeDate: new Date().toISOString(),
+            };
+    
+            try {
+                const response = await fetch(`https://localhost:5000/api/Status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newStatus),
+                });
+    
+                if (response.ok) {
+                    fetchDevices(); // רענון רשימת המכשירים לאחר עדכון הסטטוס
+                } else {
+                    console.error('Failed to update status.');
+                }
+            } catch (err) {
+                console.error('Error updating status:', err);
             }
-        } catch (err) {
-            console.error('Error updating status:', err);
         }
     };
 
