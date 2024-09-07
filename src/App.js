@@ -1,20 +1,20 @@
-import './App.css';
-import DeviceFormModal from './pages/DeviceFormModal';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import DeviceList from './pages/DeviceList';
-//import DeviceList from './pages/DeviceList';
-//import Routing from './routing/routing'
+import DeviceFormModal from './pages/DeviceFormModal';
+import './App.css';
+
 function App() {
   return (
-    <div className="App">
-  
-     <DeviceList></DeviceList>
-    </div>
-  
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<DeviceList />} />
+          <Route path="/add-device" element={<DeviceFormModal />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
 export default App;
-  // <div className="App">
-     
-    //   <Routing />
-    // </div>   {/* <DeviceList></DeviceList> */}

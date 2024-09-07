@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from 'react-modal';
 import '../css/DeviceList.css';
 
@@ -12,6 +13,8 @@ const DeviceList = () => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedDevice, setSelectedDevice] = useState(null);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         fetchDevices();
     }, []);
@@ -20,7 +23,6 @@ const DeviceList = () => {
         try {
             const response = await fetch('https://localhost:5000/api/Device');
             const data = await response.json();
-            console.log('Devices data:', data);
             setDevices(data);
             fetchCurrentStatuses(data);
         } catch (err) {
@@ -60,7 +62,12 @@ const DeviceList = () => {
             return;
         }
     
-        const updatedDevice = { ...selectedDevice, finalPrice: selectedDevice.finalPriceInput };
+        const updatedDevice = { 
+            ...selectedDevice, 
+            finalPrice: selectedDevice.finalPriceInput,
+            statusId: '5'  // קוד סטטוס הסתיים
+        };
+    
         try {
             const response = await fetch(`https://localhost:5000/api/Device/${selectedDevice.id}`, {
                 method: 'PUT',
@@ -69,22 +76,32 @@ const DeviceList = () => {
             });
     
             if (response.ok) {
-                fetchDevices(); // עדכון רשימת המכשירים לאחר השינוי
-                setModalIsOpen(false);
+                const statusUpdateResponse = await fetch(`https://localhost:5000/api/Status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        deviceId: selectedDevice.id,
+                        statusId: '5',  // קוד סטטוס הסתיים
+                        statusChangeDate: new Date().toISOString(),
+                    }),
+                });
+    
+                if (statusUpdateResponse.ok) {
+                    fetchDevices();
+                    setModalIsOpen(false);
+                } else {
+                    console.error('Failed to update status.');
+                }
             } else {
                 console.error('Failed to update final price.');
             }
         } catch (err) {
-            console.error('Error updating final price:', err);
+            console.error('Error updating final price or status:', err);
         }
     };
 
-    const handlePriceChange = (e) => {
-        setSelectedDevice({ ...selectedDevice, finalPriceInput: e.target.value });
-    };
-
     const handleStatusChange = async (deviceId, newStatusId) => {
-        if (newStatusId === '5') { // מספר הזיהוי של סטטוס 'הסתיים'
+        if (newStatusId === '5') {
             setSelectedDevice(devices.find(device => device.id === deviceId));
             setModalIsOpen(true);
         } else {
@@ -93,16 +110,16 @@ const DeviceList = () => {
                 statusId: newStatusId,
                 statusChangeDate: new Date().toISOString(),
             };
-    
+
             try {
                 const response = await fetch(`https://localhost:5000/api/Status`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newStatus),
                 });
-    
+
                 if (response.ok) {
-                    fetchDevices(); // רענון רשימת המכשירים לאחר עדכון הסטטוס
+                    fetchDevices();
                 } else {
                     console.error('Failed to update status.');
                 }
@@ -112,11 +129,20 @@ const DeviceList = () => {
         }
     };
 
+    const handlePriceChange = (e) => {
+        setSelectedDevice({ ...selectedDevice, finalPriceInput: e.target.value });
+    };
+
+    const goToAddDevicePage = () => {
+        navigate('/add-device');
+    };
+
     if (loading) return <div>טוען...</div>;
     if (error) return <div>שגיאה: {error}</div>;
 
     return (
         <div>
+            <button onClick={goToAddDevicePage} style={{ float: 'left' }}>הוסף מכשיר חדש</button>
             <h1>רשימת מכשירים</h1>
             <table>
                 <thead>
@@ -184,84 +210,3 @@ const DeviceList = () => {
 };
 
 export default DeviceList;
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import DeviceFormModal from './DeviceFormModal'; // Import the DeviceFormModal component
-// import Modal from 'react-modal';
-// import '../css/DeviceList.css';
-
-// Modal.setAppElement('#root');  // Set the root element for the modal
-
-// const DeviceList = () => {
-//     const [devices, setDevices] = useState([]);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState('');
-//     const [modalIsOpen, setModalIsOpen] = useState(false); // Modal state for DeviceFormModal
-
-//     useEffect(() => {
-//         fetchDevices();
-//     }, []);
-
-//     const fetchDevices = async () => {
-//         try {
-//             const response = await fetch('https://localhost:5000/api/Device');
-//             const data = await response.json();
-//             setDevices(data);
-//             setLoading(false);
-//         } catch (err) {
-//             setError('נכשל בטעינת המכשירים: ' + err.message);
-//             setLoading(false);
-//         }
-//     };
-
-//     const openModal = () => {
-//         setModalIsOpen(true);
-//     };
-
-//     const closeModal = () => {
-//         setModalIsOpen(false);
-//     };
-
-//     if (loading) return <div>טוען...</div>;
-//     if (error) return <div>שגיאה: {error}</div>;
-
-//     return (
-//         <div>
-//             <h1>רשימת מכשירים</h1>
-
-//             {/* Button to open the modal for adding a new device */}
-//             <button onClick={openModal}>הוסף מכשיר חדש</button>
-
-//             {/* Device Form Modal */}
-//             <DeviceFormModal modalIsOpen={modalIsOpen} closeModal={closeModal} />
-
-//             <table>
-//                 <thead>
-//                     <tr>
-//                         <th>סוג</th>
-//                         <th>דגם</th>
-//                         <th>תקלה</th>
-//                         <th>מחיר משוער</th>
-//                         <th>סטטוס</th>
-//                         <th>פעולות</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {devices.map(device => (
-//                         <tr key={device.id}>
-//                             <td>{device.deviceType}</td>
-//                             <td>{device.deviceModel}</td>
-//                             <td>{device.issueDescription}</td>
-//                             <td>₪{device.estimatedPrice.toFixed(2)}</td>
-//                             <td>{device.status}</td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </table>
-//         </div>
-//     );
-// };
-
-// export default DeviceList;
