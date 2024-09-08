@@ -1,87 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Modal from 'react-modal';
-import '../css/Dashboard.css';
+import React from 'react';
+import { Box, Typography, Grid, Paper } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import styles from '../css/Dashboard.module.css';
 
-
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Paper 
-} from '@mui/material';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer
-} from 'recharts';
-
-// Mock data (replace with actual API calls)
+// Sample data
 const monthlyOrdersData = [
-  { month: 'Jan', orders: 0 },
-  { month: 'Feb', orders: 0 },
-  { month: 'Mar', orders: 0 },
-  { month: 'Apr', orders: 0 },
-  { month: 'May', orders: 0 },
-  { month: 'Jun', orders: 0 },
-  { month: 'Jul', orders: 0 },
-  { month: 'Aug', orders: 0 },
-  { month: 'Sep', orders: 1 },
-  { month: 'Oct', orders: 0 },
-  { month: 'Nov', orders: 0 },
-  { month: 'Dec', orders: 0 },
+  { month: 'January', orders: 120 },
+  { month: 'February', orders: 98 },
+  { month: 'March', orders: 150 }
 ];
 
 const dailyOrdersData = [
-  { date: '2024-09-01', orders: 0 },
-  { date: '2024-09-02', orders: 0 },
-  { date: '2024-09-03', orders: 0 },
-  { date: '2024-09-04', orders: 0 },
-  { date: '2024-09-05', orders: 0 },
-  { date: '2024-09-06', orders: 1 },
-  { date: '2024-09-07', orders: 0 },
+  { date: '2024-09-01', orders: 12 },
+  { date: '2024-09-02', orders: 15 },
+  { date: '2024-09-03', orders: 10 }
 ];
 
 const statusData = [
-  { name: 'הסתיים', value: 2 },
-  { name: 'נכנס', value: 0 },
-  { name: 'בטיפול', value: 0 },
-  { name: 'הוזמן רכיב', value: 0 },
-  { name: 'תקוע', value: 0 },
+  { name: 'In Progress', value: 400 },
+  { name: 'Completed', value: 300 },
+  { name: 'Pending', value: 200 },
+  { name: 'Canceled', value: 100 },
 ];
+
+const renderCustomizedLabel = ({ x, y, name, value }) => (
+  <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
+    {`${name} (${value})`}
+  </text>
+);
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 const deviceTypeData = [
-  { name: 'מחשב', value: 0 },
-  { name: 'טלפון', value: 2 },
-  { name: 'אחר', value: 0 },
+  { name: 'Phones', value: 400 },
+  { name: 'Computers', value: 300 },
+  { name: 'Other', value: 100 },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-/**
- * Dashboard component displaying various charts
- * @returns {JSX.Element} The rendered Dashboard component
- */
 function Dashboard() {
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box className={styles.dashboard}>
+      <Typography variant="h4" component="h1" className={styles.title}>
         DASHBOARD
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} className={styles.gridContainer}>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">הזמנות לפי חודשים</Typography>
+          <Paper className={styles.paper}>
+            <Typography variant="h6" className={styles.chartTitle}>הזמנות לפי חודשים</Typography>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyOrdersData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -89,14 +54,15 @@ function Dashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="orders" fill="#8884d8" />
+                <Bar dataKey="orders" fill="#4caf50" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">הזמנות לפי ימים</Typography>
+          <Paper className={styles.paper}>
+            <Typography variant="h6" className={styles.chartTitle}>הזמנות לפי ימים</Typography>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={dailyOrdersData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -104,14 +70,15 @@ function Dashboard() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="orders" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="orders" stroke="#00a86b" />
               </LineChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">כמות מכשירים לכל סטטוס</Typography>
+          <Paper className={styles.paper}>
+            <Typography variant="h6" className={styles.chartTitle}>כמות מכשירים לכל סטטוס</Typography>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -119,10 +86,10 @@ function Dashboard() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  outerRadius={80}
+                  outerRadius={120}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={renderCustomizedLabel}
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -133,9 +100,10 @@ function Dashboard() {
             </ResponsiveContainer>
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">כמות הזמנות מכל סוג</Typography>
+          <Paper className={styles.paper}>
+            <Typography variant="h6" className={styles.chartTitle}>כמות הזמנות מכל סוג</Typography>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={deviceTypeData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
@@ -143,7 +111,7 @@ function Dashboard() {
                 <YAxis dataKey="name" type="category" />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="value" fill="#82ca9d" />
+                <Bar dataKey="value" fill="#4caf50" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
