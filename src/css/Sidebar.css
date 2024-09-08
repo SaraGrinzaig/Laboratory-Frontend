@@ -1,0 +1,36 @@
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 100%;
+    background-color: #f4f4f4;
+    padding-top: 20px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  }
+  
+  .sidebar ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin: 20px 0;
+  }
+  
+  .sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+  }
+  
+  .sidebar ul li a:hover {
+    color: #4caf50;
+  }
+  
+  .main-content {
+    margin-right: 220px; /* To prevent content from being hidden under the sidebar */
+    padding: 20px;
+  }
+  

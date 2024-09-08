@@ -122,7 +122,7 @@ const DeviceList = () => {
             <button onClick={goToAddDevicePage} className="btn btn-success" style={{ float: 'left', marginBottom: '20px' }}>
                 הוסף מכשיר חדש
             </button>
-            <h1 className="text-center">רשימת מכשירים</h1>
+            <h2 className="text-center">מכשירים</h2>
 
             <table className="table table-striped table-bordered">
                 <thead>
