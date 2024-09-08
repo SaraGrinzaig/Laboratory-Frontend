@@ -1,0 +1,79 @@
+.dashboard {
+  background-color: #f0f4f0;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title {
+  color: #2c5e2e;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.gridContainer {
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.paper {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.paper:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.chartTitle {
+  color: #1e441f;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.chartContainer {
+  height: 300px;
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .chartContainer {
+    height: 250px;
+  }
+
+  .gridContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .paper {
+    margin-bottom: 20px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .chartTitle {
+    font-size: 1rem;
+  }
+
+  .gridContainer {
+    padding: 10px;
+  }
+}
