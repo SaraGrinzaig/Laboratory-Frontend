@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Modal from 'react-modal';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Modal, Button, Form } from 'react-bootstrap';
 import '../css/DeviceList.css';
-
-Modal.setAppElement('#root');
 
 const DeviceList = () => {
     const [devices, setDevices] = useState([]);
@@ -11,6 +10,7 @@ const DeviceList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [formData, setFormData] = useState({});
     const [selectedDevice, setSelectedDevice] = useState(null);
 
     const navigate = useNavigate();
@@ -53,51 +53,32 @@ const DeviceList = () => {
 
     const handleOpenModal = (device) => {
         setSelectedDevice(device);
-        setModalIsOpen(true);
+        setFormData(device); 
+        setModalIsOpen(true); 
     };
 
     const handleFinalPriceSubmit = async () => {
-        if (!selectedDevice.finalPriceInput) {
-            alert('נא להזין מחיר סופי');
-            return;
-        }
-    
-        const updatedDevice = { 
-            ...selectedDevice, 
-            finalPrice: selectedDevice.finalPriceInput,
-            statusId: '5'  // קוד סטטוס הסתיים
-        };
-    
         try {
             const response = await fetch(`https://localhost:5000/api/Device/${selectedDevice.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedDevice),
+                body: JSON.stringify(formData),
             });
-    
+
             if (response.ok) {
-                const statusUpdateResponse = await fetch(`https://localhost:5000/api/Status`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        deviceId: selectedDevice.id,
-                        statusId: '5',  // קוד סטטוס הסתיים
-                        statusChangeDate: new Date().toISOString(),
-                    }),
-                });
-    
-                if (statusUpdateResponse.ok) {
-                    fetchDevices();
-                    setModalIsOpen(false);
-                } else {
-                    console.error('Failed to update status.');
-                }
+                fetchDevices();
+                setModalIsOpen(false); 
             } else {
-                console.error('Failed to update final price.');
+                console.error('Failed to update the device.');
             }
         } catch (err) {
-            console.error('Error updating final price or status:', err);
+            console.error('Error updating the device:', err);
         }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleStatusChange = async (deviceId, newStatusId) => {
@@ -119,7 +100,7 @@ const DeviceList = () => {
                 });
 
                 if (response.ok) {
-                    fetchDevices();
+                    fetchDevices(); 
                 } else {
                     console.error('Failed to update status.');
                 }
@@ -127,10 +108,6 @@ const DeviceList = () => {
                 console.error('Error updating status:', err);
             }
         }
-    };
-
-    const handlePriceChange = (e) => {
-        setSelectedDevice({ ...selectedDevice, finalPriceInput: e.target.value });
     };
 
     const goToAddDevicePage = () => {
@@ -142,9 +119,12 @@ const DeviceList = () => {
 
     return (
         <div>
-            <button onClick={goToAddDevicePage} style={{ float: 'left' }}>הוסף מכשיר חדש</button>
-            <h1>רשימת מכשירים</h1>
-            <table>
+            <button onClick={goToAddDevicePage} className="btn btn-success" style={{ float: 'left', marginBottom: '20px' }}>
+                הוסף מכשיר חדש
+            </button>
+            <h1 className="text-center">רשימת מכשירים</h1>
+
+            <table className="table table-striped table-bordered">
                 <thead>
                     <tr>
                         <th>סוג</th>
@@ -153,6 +133,7 @@ const DeviceList = () => {
                         <th>סטטוס נוכחי</th>
                         <th>מחיר משוער</th>
                         <th>מחיר סופי</th>
+                        <th>פעולות</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -175,35 +156,81 @@ const DeviceList = () => {
                             </td>
                             <td>₪{device.estimatedPrice ? device.estimatedPrice.toFixed(2) : ''}</td>
                             <td>{device.finalPrice ? `₪${device.finalPrice.toFixed(2)}` : ''}</td>
+                            <td>
+                                <button onClick={() => handleOpenModal(device)} className="btn btn-success">
+                                    ערוך
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <Modal
-                isOpen={modalIsOpen}
-                onRequestClose={() => setModalIsOpen(false)}
-                contentLabel="הכנס מחיר סופי"
-                style={{
-                    content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
-                        bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '30%',
-                    },
-                }}
-            >
-                <h2>הכנס מחיר סופי ל-{selectedDevice?.deviceModel}</h2>
-                <input
-                    type="number"
-                    value={selectedDevice?.finalPriceInput || ''}
-                    onChange={handlePriceChange}
-                    style={{ width: '100%' }}
-                />
-                <button onClick={handleFinalPriceSubmit}>שלח</button>
+            <Modal show={modalIsOpen} onHide={() => setModalIsOpen(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>ערוך את {selectedDevice?.deviceModel}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="formDeviceType">
+                            <Form.Label>סוג</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="deviceType"
+                                value={formData.deviceType || ''}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group controlId="formDeviceModel">
+                            <Form.Label>דגם</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="deviceModel"
+                                value={formData.deviceModel || ''}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group controlId="formIssueDescription">
+                            <Form.Label>תקלה</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="issueDescription"
+                                value={formData.issueDescription || ''}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group controlId="formEstimatedPrice">
+                            <Form.Label>מחיר משוער</Form.Label>
+                            <Form.Control
+                                type="number"
+                                name="estimatedPrice"
+                                value={formData.estimatedPrice || ''}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+
+                        <Form.Group controlId="formFinalPrice">
+                            <Form.Label>מחיר סופי</Form.Label>
+                            <Form.Control
+                                type="number"
+                                name="finalPrice"
+                                value={formData.finalPrice || ''}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setModalIsOpen(false)}>
+                        סגור
+                    </Button>
+                    <Button variant="success" onClick={handleFinalPriceSubmit}>
+                        שמור
+                    </Button>
+                </Modal.Footer>
             </Modal>
         </div>
     );
