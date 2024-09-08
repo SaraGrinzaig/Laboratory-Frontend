@@ -9,7 +9,7 @@ const DeviceList = () => {
     const [currentStatuses, setCurrentStatuses] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false); // modal control state
     const [formData, setFormData] = useState({});
     const [selectedDevice, setSelectedDevice] = useState(null);
 
@@ -52,9 +52,11 @@ const DeviceList = () => {
     };
 
     const handleOpenModal = (device) => {
-        setSelectedDevice(device);
-        setFormData(device); 
-        setModalIsOpen(true); 
+        if (!modalIsOpen) {  // Only open if modal is not already open
+            setSelectedDevice(device);
+            setFormData(device); 
+            setModalIsOpen(true); 
+        }
     };
 
     const handleFinalPriceSubmit = async () => {
@@ -67,7 +69,7 @@ const DeviceList = () => {
 
             if (response.ok) {
                 fetchDevices();
-                setModalIsOpen(false); 
+                setModalIsOpen(false); // Close modal after successful update
             } else {
                 console.error('Failed to update the device.');
             }
@@ -82,7 +84,7 @@ const DeviceList = () => {
     };
 
     const handleStatusChange = async (deviceId, newStatusId) => {
-        if (newStatusId === '5') {
+        if (newStatusId === '5') { // If status is 'Finished', open modal for final price
             setSelectedDevice(devices.find(device => device.id === deviceId));
             setModalIsOpen(true);
         } else {

@@ -15,7 +15,7 @@ function App() {
         <div className="sidebar">
           <ul>
             <li>
-              <Link to="/dashboard">דשבורד ונתונים</Link>
+              <Link to="/">דשבורד ונתונים</Link>
             </li>
             <li>
               <Link to="/devices">מכשירים</Link>
@@ -30,7 +30,7 @@ function App() {
           <Routes>
             <Route path="/devices" element={<DeviceList />} />
             <Route path="/add-device" element={<DeviceFormModal />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/customers" element={<CustomerList />} />
           </Routes>
         </div>

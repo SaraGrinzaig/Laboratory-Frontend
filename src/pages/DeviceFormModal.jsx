@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import { Button, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 Modal.setAppElement('#root');
@@ -36,9 +36,49 @@ const DeviceFormModal = () => {
     notes: Yup.string()
   });
 
-  const handleSubmit = (values) => {
-    console.log(values);
-    closeModal();
+  const handleSubmit = async (values) => {
+    try {
+      // קריאה ראשונה - הכנסת לקוח חדש
+      const customerResponse = await fetch('https://localhost:5000/api/Customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: values.fullName,
+          phoneNumber: values.phoneNumber,
+          email: values.email
+        }),
+      });
+
+      if (customerResponse.ok) {
+        const customerData = await customerResponse.json();
+
+        // קריאה שנייה - הכנסת מכשיר חדש עם הלקוח שהוזן
+        const deviceResponse = await fetch('https://localhost:5000/api/Device', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerId: customerData.id, // זה מזהה הלקוח שנוצר מהקריאה הראשונה
+            deviceType: values.deviceType,
+            model: values.model,
+            issueDescription: values.issueDescription,
+            estimatedPrice: values.estimatedPrice,
+            finalPrice: values.finalPrice,
+            notes: values.notes
+          }),
+        });
+
+        if (deviceResponse.ok) {
+          console.log('הכנסת המכשיר התבצעה בהצלחה');
+          closeModal();
+        } else {
+          console.error('נכשל בהכנסת המכשיר');
+        }
+      } else {
+        console.error('נכשל בהכנסת הלקוח');
+      }
+    } catch (err) {
+      console.error('שגיאה בעת קריאות ה-API:', err);
+    }
   };
 
   return (
