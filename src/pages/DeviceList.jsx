@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { Formik, Form as FormikForm, Field } from 'formik';
+import * as Yup from 'yup';
 import '../css/DeviceList.css';
 
 const DeviceList = () => {
@@ -11,6 +14,7 @@ const DeviceList = () => {
     const [error, setError] = useState('');
     const [finalPriceModalIsOpen, setFinalPriceModalIsOpen] = useState(false); // modal control state for final price
     const [editModalIsOpen, setEditModalIsOpen] = useState(false); // modal control state for editing device
+    const [addModalIsOpen, setAddModalIsOpen] = useState(false); // modal control state for adding device
     const [formData, setFormData] = useState({});
     const [selectedDevice, setSelectedDevice] = useState(null);
     const [finalPrice, setFinalPrice] = useState('');
@@ -128,6 +132,63 @@ const DeviceList = () => {
         }
     };
 
+    const handleAddDevice = async (values) => {
+        try {
+            // קריאה ל-API עבור הוספת לקוח
+            const customerResponse = await fetch('https://localhost:5000/api/Customer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fullName: values.fullName,
+                    phone: values.phoneNumber,
+                    email: values.email,
+                }),
+            });
+
+            if (customerResponse.ok) {
+                // עיכוב של 2 שניות לפני הבקשה ללקוחות כדי לוודא שהלקוח נוסף לבסיס הנתונים
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // קריאה ל-API עבור קבלת הלקוח לפי האימייל
+                const customersResponse = await fetch('https://localhost:5000/api/Customer');
+                const customers = await customersResponse.json();
+
+                const foundCustomer = customers.find(customer => customer.email === values.email);
+                if (!foundCustomer) {
+                    console.error(`No matching customer found for email: ${values.email}`);
+                    return;
+                }
+
+                // קריאה ל-API עבור הוספת מכשיר
+                const deviceResponse = await fetch('https://localhost:5000/api/Device', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerId: foundCustomer.id,
+                        deviceType: values.deviceType,
+                        deviceModel: values.deviceModel,
+                        issueDescription: values.issueDescription,
+                        unlockCode: values.unlockCode,
+                        estimatedPrice: values.estimatedPrice || null,
+                        finalPrice: values.finalPrice || null,
+                        notes: values.notes || null,
+                    }),
+                });
+
+                if (deviceResponse.ok) {
+                    fetchDevices(); // Refresh device list
+                    setAddModalIsOpen(false); // Close modal
+                } else {
+                    console.error('Failed to create device:', await deviceResponse.text());
+                }
+            } else {
+                console.error('Failed to create customer:', await customerResponse.text());
+            }
+        } catch (err) {
+            console.error('Error in API calls:', err);
+        }
+    };
+
     const handleEditSubmit = async () => {
         try {
             const response = await fetch(`https://localhost:5000/api/Device/${selectedDevice.id}`, {
@@ -152,11 +213,18 @@ const DeviceList = () => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const handleOpenAddModal = () => {
+        setAddModalIsOpen(true);
+    };
+
     if (loading) return <div>טוען...</div>;
     if (error) return <div>שגיאה: {error}</div>;
 
     return (
         <div>
+            <button onClick={handleOpenAddModal} className="btn btn-success" style={{ float: 'left', marginBottom: '20px' }}>
+                הוסף מכשיר חדש
+            </button>
             <h2 className="text-center">מכשירים</h2>
 
             <table className="table table-striped table-bordered">
@@ -200,6 +268,141 @@ const DeviceList = () => {
                     ))}
                 </tbody>
             </table>
+
+            {/* Add Device Modal */}
+            <Modal show={addModalIsOpen} onHide={() => setAddModalIsOpen(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>הכנס פרטי מכשיר חדש</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Formik
+                        initialValues={{
+                            fullName: '',
+                            phoneNumber: '',
+                            email: '',
+                            deviceType: '',
+                            deviceModel: '',
+                            issueDescription: '',
+                            unlockCode: '',
+                            estimatedPrice: '',
+                            finalPrice: '',
+                            notes: ''
+                        }}
+                        validationSchema={Yup.object({
+                            fullName: Yup.string().required('שם הלקוח הוא שדה חובה'),
+                            phoneNumber: Yup.string().required('מספר טלפון של הלקוח הוא שדה חובה'),
+                            email: Yup.string().email('כתובת אימייל לא תקינה').required('אימייל של הלקוח הוא שדה חובה'),
+                            deviceType: Yup.string().required('יש לבחור סוג מכשיר'),
+                            deviceModel: Yup.string().required('דגם הוא שדה חובה'),
+                            issueDescription: Yup.string().required('תיאור התקלה הוא שדה חובה'),
+                            unlockCode: Yup.string().required('קוד נעילה הוא שדה חובה'),
+                            estimatedPrice: Yup.number().typeError('מחיר משוער חייב להיות מספר'),
+                            finalPrice: Yup.number().typeError('מחיר סופי חייב להיות מספר'),
+                            notes: Yup.string(),
+                        })}
+                        onSubmit={handleAddDevice}
+                    >
+                        {({ handleChange, values }) => (
+                            <FormikForm>
+                                <TextField
+                                    name="fullName"
+                                    label="שם מלא"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.fullName}
+                                />
+                                <TextField
+                                    name="phoneNumber"
+                                    label="מספר טלפון"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.phoneNumber}
+                                />
+                                <TextField
+                                    name="email"
+                                    label="אימייל"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.email}
+                                />
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel>סוג מכשיר</InputLabel>
+                                    <Field
+                                        as={Select}
+                                        name="deviceType"
+                                        onChange={handleChange}
+                                        value={values.deviceType}
+                                    >
+                                        <MenuItem value="Phone">פלאפון</MenuItem>
+                                        <MenuItem value="Computer">מחשב</MenuItem>
+                                        <MenuItem value="Other">אחר</MenuItem>
+                                    </Field>
+                                </FormControl>
+                                <TextField
+                                    name="deviceModel"
+                                    label="דגם"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.deviceModel}
+                                />
+                                <TextField
+                                    name="issueDescription"
+                                    label="תיאור התקלה"
+                                    multiline
+                                    rows={3}
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.issueDescription}
+                                />
+                                <TextField
+                                    name="unlockCode"
+                                    label="קוד נעילה"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.unlockCode}
+                                />
+                                <TextField
+                                    name="estimatedPrice"
+                                    type="number"
+                                    label="מחיר משוער"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.estimatedPrice}
+                                />
+                                <TextField
+                                    name="finalPrice"
+                                    type="number"
+                                    label="מחיר סופי"
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.finalPrice}
+                                />
+                                <TextField
+                                    name="notes"
+                                    label="הערות"
+                                    multiline
+                                    rows={3}
+                                    fullWidth
+                                    margin="normal"
+                                    onChange={handleChange}
+                                    value={values.notes}
+                                />
+                                <Button type="submit" variant="success" fullWidth>
+                                    שמור
+                                </Button>
+                            </FormikForm>
+                        )}
+                    </Formik>
+                </Modal.Body>
+            </Modal>
 
             {/* Final Price Modal */}
             <Modal show={finalPriceModalIsOpen} onHide={() => setFinalPriceModalIsOpen(false)} centered>
