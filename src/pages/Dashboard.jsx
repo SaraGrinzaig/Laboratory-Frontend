@@ -1,43 +1,85 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Paper } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import styles from '../css/Dashboard.module.css';
 
-// Sample data
-const monthlyOrdersData = [
-  { month: 'January', orders: 120 },
-  { month: 'February', orders: 98 },
-  { month: 'March', orders: 150 }
-];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-const dailyOrdersData = [
-  { date: '2024-09-01', orders: 12 },
-  { date: '2024-09-02', orders: 15 },
-  { date: '2024-09-03', orders: 10 }
-];
-
-const statusData = [
-  { name: 'In Progress', value: 400 },
-  { name: 'Completed', value: 300 },
-  { name: 'Pending', value: 200 },
-  { name: 'Canceled', value: 100 },
-];
-
+// Customized label for pie charts
 const renderCustomizedLabel = ({ x, y, name, value }) => (
   <text x={x} y={y} fill="black" textAnchor="middle" dominantBaseline="central">
     {`${name} (${value})`}
   </text>
 );
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-
-const deviceTypeData = [
-  { name: 'Phones', value: 400 },
-  { name: 'Computers', value: 300 },
-  { name: 'Other', value: 100 },
-];
-
 function Dashboard() {
+  const [monthlyOrdersData, setMonthlyOrdersData] = useState([]);
+  const [dailyOrdersData, setDailyOrdersData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+  const [deviceTypeData, setDeviceTypeData] = useState([]);
+
+  // Fetch monthly orders
+  useEffect(() => {
+    fetch('https://localhost:5000/api/Statistic/devices-per-month')
+      .then(response => response.json())
+      .then(data => {
+        const formattedData = Object.entries(data).map(([month, orders]) => ({
+          month: `Month ${month}`, // You can format this as you want
+          orders
+        }));
+        setMonthlyOrdersData(formattedData);
+      })
+      .catch(error => console.error('Error fetching monthly orders:', error));
+  }, []);
+
+  // Fetch daily orders
+  useEffect(() => {
+    fetch('https://localhost:5000/api/Statistic/devices-per-day')
+      .then(response => response.json())
+      .then(data => {
+        const formattedData = Object.entries(data).map(([date, orders]) => ({
+          date: new Date(date).toLocaleDateString(), // Format date
+          orders
+        }));
+        setDailyOrdersData(formattedData);
+      })
+      .catch(error => console.error('Error fetching daily orders:', error));
+  }, []);
+
+  // Fetch device statuses
+  useEffect(() => {
+    fetch('https://localhost:5000/api/Statistic/devices-by-status')
+      .then(response => response.json())
+      .then(data => {
+        const formattedData = Object.entries(data).map(([name, value]) => ({
+          name,
+          value
+        }));
+        setStatusData(formattedData);
+      })
+      .catch(error => console.error('Error fetching device statuses:', error));
+  }, []);
+
+// Fetch device types
+useEffect(() => {
+  fetch('https://localhost:5000/api/Statistic/devices-by-type')
+    .then(response => response.json())
+    .then(data => {
+      const formattedData = Object.entries(data).map(([name, value]) => {
+        if (name === '????') {
+          name = 'אחר';
+        } else if (name === 'Computer') {
+          name = 'מחשב';
+        } else if (name === 'Phone') {
+          name = 'פלאפון';
+        }
+        return { name, value };
+      });
+      setDeviceTypeData(formattedData);
+    })
+    .catch(error => console.error('Error fetching device types:', error));
+}, []);
+
   return (
     <Box className={styles.dashboard}>
       <Typography variant="h4" component="h1" className={styles.title}>
