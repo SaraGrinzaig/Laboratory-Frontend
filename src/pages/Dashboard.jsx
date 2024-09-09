@@ -41,7 +41,7 @@ function Dashboard() {
   return (
     <Box className={styles.dashboard}>
       <Typography variant="h4" component="h1" className={styles.title}>
-        DASHBOARD
+        נתונים וסטטיסטיקות
       </Typography>
       <Grid container spacing={3} className={styles.gridContainer}>
         <Grid item xs={12} md={6}>
