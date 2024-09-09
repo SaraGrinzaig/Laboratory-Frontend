@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Form } from 'react-bootstrap';
-import '../css/DeviceList.css'; // Reusing the same CSS for consistent styling
+import '../css/DeviceList.css';
 
 const CustomerList = () => {
     const [customers, setCustomers] = useState([]);

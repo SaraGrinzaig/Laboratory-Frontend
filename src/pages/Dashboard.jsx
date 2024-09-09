@@ -66,7 +66,7 @@ useEffect(() => {
     .then(response => response.json())
     .then(data => {
       const formattedData = Object.entries(data).map(([name, value]) => {
-        if (name === '????') {
+        if (name === '????'||name === 'Other'||name === 'other') {
           name = 'אחר';
         } else if (name === 'Computer') {
           name = 'מחשב';
