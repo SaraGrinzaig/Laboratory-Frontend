@@ -30,7 +30,7 @@ const DeviceList = () => {
         try {
             const response = await fetch('https://localhost:5000/api/Device');
             const data = await response.json();
-            setDevices(data);
+            setDevices(data.reverse());
             fetchCurrentStatuses(data);
         } catch (err) {
             setError('נכשל בטעינת המכשירים: ' + err.message);
