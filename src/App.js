@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import DeviceList from './pages/DeviceList';
-import DeviceFormModal from './pages/DeviceFormModal';
 import Dashboard from './pages/Dashboard';
 import './App.css';
 import './css/Sidebar.css';
@@ -29,7 +28,6 @@ function App() {
         <div className="main-content">
           <Routes>
             <Route path="/devices" element={<DeviceList />} />
-            <Route path="/add-device" element={<DeviceFormModal />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/customers" element={<CustomerList />} />
           </Routes>

@@ -19,18 +19,18 @@ const CustomerList = () => {
         try {
             const response = await fetch('https://localhost:5000/api/Customer');
             const data = await response.json();
-            setCustomers(data);
+            setCustomers(data.reverse());
         } catch (err) {
             setError('נכשל בטעינת הלקוחות: ' + err.message);
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     const handleOpenModal = (customer) => {
         setSelectedCustomer(customer);
         setFormData(customer); // Initialize form data with selected customer details
-        setModalIsOpen(true);  // Open modal
+        setModalIsOpen(true);
     };
 
     const handleInputChange = (e) => {
@@ -47,8 +47,8 @@ const CustomerList = () => {
             });
 
             if (response.ok) {
-                fetchCustomers();  // Refresh the customer list
-                setModalIsOpen(false); // Close the modal
+                fetchCustomers();
+                setModalIsOpen(false);
             } else {
                 console.error('Failed to update customer.');
             }

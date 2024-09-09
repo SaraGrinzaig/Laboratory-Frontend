@@ -27,14 +27,15 @@ const DeviceList = () => {
         try {
             const response = await fetch('https://localhost:5000/api/Device');
             const data = await response.json();
-            setDevices(data);
-            fetchCurrentStatuses(data);
+            const reversedData = data.reverse();
+            setDevices(reversedData);
+            fetchCurrentStatuses(reversedData);
         } catch (err) {
             setError('נכשל בטעינת המכשירים: ' + err.message);
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     const fetchCurrentStatuses = async (devices) => {
         const statusPromises = devices.map(async (device) => {
